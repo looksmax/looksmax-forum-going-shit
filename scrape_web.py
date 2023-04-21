@@ -23,7 +23,7 @@ def fetch_page(url:str):
     print('Fetch ' + url)
     try:
         response = requests.get(url,timeout=TIMEOUT_DURATION)
-    except requests.exceptions.Timeout or requests.exceptions.ConnectionError or requests.exceptions.ReadTimeout or requests.exceptions.ReadTimeout:
+    except requests.exceptions.RequestException:
         response = fetch_page(url)
     return response
 
