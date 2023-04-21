@@ -3,7 +3,7 @@ import copy
 
 dictionary = {
 
-    'Craniofacial Anatomical and Medical Terms': [
+    'Anatomical and Medical Terms': [
         'maxilla', 'maxillary', 'mandible', 'mandibular', 'ramus', 'gonion', 'gonial', 'menton', 'tragus', 'tragion',
         'cranium', 'craniofacial', 'cranial', 'cephalic', 'brachycephalic', 'mesocephalic', 'dolichocephalic', 'fossae',
         'fossa',
@@ -16,29 +16,32 @@ dictionary = {
         'ossification', 'osteogenisis', 'remodeling', 'fracture', 'osteoblast', 'osteoclast', 'resorption', 'formation',
         'osteotomy', 'suture',
         'buccal', 'dental', 'palate', 'palatal', 'molar', 'incisor', 'occlusion', 'malocclusion', 'canine',
-        'intermolar',
+        'intermolar','eme angle',
         'brow ridge', 'nose bridge', 'nasal spine', 'cheekbone', 'saggital', 'transverse', 'wisdom teeth',
         'wisdom tooth', 'extraction',
         'xray', 'x-ray', 'x ray', 'ceph', 'cephalogram', 'cephalometric',
-        'mse','fagga','agga','soft tissue',
+        'mse','fagga','agga','soft tissue','hyoid','collagen',
         'bonemass','bone mass','bone density',
+        'canthoplasty','rhino','rhinoplasty','genio','genioplasty',
+        'dexa scan',
     ],
-    'Incel- and Blackpill-Related Terms' : [
-        'chad','stacy','becky','melvin','eugene','stacylite','chadlite','brad','normie','megachad','gigachad','terachad','turbochad',
+    'Incel and Blackpill Lingo' : [
+        'chad','stacy','becky','melvin','eugene','stacylite','chadlite','brad','normie','megachad','gigachad','terachad','turbochad','tyrone','chang','chadpreet','tyronelite','changlite',
         'truecel','incel','inkwell','fatcel','wristcel','shortcel','braincel','copecel','bloatcel','oldcel','gymcel','oldcel','framecel','youngcel','volcel',
-        'doomer','coomer','boomer',"greycel",'graycel',
+        'doomer','coomer','boomer',"greycel",'graycel','cooming',
         'rotter','dweller','neet','psl','looksmax','lookism',
         'cope','rope','copium','coping','coper','megacope','gigacope','teracope','turbocope','copemax','ropemax','roping','roper',
         'tallfag','manlet','turbomanlet','framelet','lanklet','lank',
         'mog','mogger','moggee','heightmog','framemog','iqmog','looksmog','facemog','racemog',
         'subhuman','sub5','subfive','sub 5','sub-5','sub-five','sub five',
         'moid','foid','femoid',
-        'softmax','hardmax',
+        'softmax','hardmax','pua','lms',
         'virgin','sexless','kissless','hugless','khhv','virginity','get laid','getting laid','tlf',
-        'blackpill','bluepill','redpill',
-        'blackpilled','bluepilled','redpilled','faceandlms','hypergamy','hypergamous',
+        'blackpill','bluepill','redpill','black pill','blue pill','red pill',
+        'blackpilled','bluepilled','redpilled','hypergamy','hypergamous',
         'wojak','pepe','soyjak','froglet','dickcel','dickpill','dicklet','cutlet',
-        'jfl','looksmaxx','bloatmaxx','bloatmax','fatmax',
+        'jfl','looksmaxx','bloatmaxx','bloatmax','fatmax','subhumanity',
+        'tales from','suifuel','lifefuel',
     ],
     'Insults and Slurs (Non-Ethnic)' : [
         'soycuck','cuck',
@@ -66,6 +69,15 @@ dictionary = {
     ],
     'Male Model Names' : [
         'chico','gandy','opry',"o'pry",'lachowski','barrett','nessman','maher',
+        'delon',
+    ],
+    'YouTubers’ Names' : [
+        'hamza','scamza',
+        'wheat waffles','wheatwaffles',
+        'nero angelo',
+        'tails',
+        'incel tv','itv','rehab room','inceltv',
+        'faceandlms',
     ],
 }
 
