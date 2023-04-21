@@ -53,6 +53,7 @@ dictionary = {
     ],
     'Racial and Ethnic Non-Slurs' : [
         'caucasoid','mongoloid','negroid','australoid',
+        'atlantid','sinid','eurafricanid','pontid',
         'black','white','brown','jew','paki','jewish','pakistani','jewed',
         'african','asian','indian','european','abo','aboriginal',
         'korean','bbc','bwc','japanese','jap','chinese',

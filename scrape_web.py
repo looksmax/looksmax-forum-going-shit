@@ -4,8 +4,8 @@ from time import sleep
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone
 
-SLEEP_DURATION = 0.5
-BACKOFF_DURATION = 10
+SLEEP_DURATION = 0.125
+BACKOFF_DURATION = 5
 TIMEOUT_DURATION = 5
 
 conn = sqlite3.connect(header.DB_FILE_NAME)
@@ -23,7 +23,7 @@ def fetch_page(url:str):
     print('Fetch ' + url)
     try:
         response = requests.get(url,timeout=TIMEOUT_DURATION)
-    except requests.Timeout or requests.ConnectionError:
+    except requests.exceptions.Timeout or requests.exceptions.ConnectionError or requests.exceptions.ReadTimeout or requests.exceptions.ReadTimeout:
         response = fetch_page(url)
     return response
 
