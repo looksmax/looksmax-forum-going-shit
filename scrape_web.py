@@ -4,8 +4,8 @@ from time import sleep
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone
 
-SLEEP_DURATION = 0.125
-BACKOFF_DURATION = 5
+SLEEP_DURATION = 0.5
+BACKOFF_DURATION = 15
 TIMEOUT_DURATION = 5
 
 conn = sqlite3.connect(header.DB_FILE_NAME)
@@ -23,7 +23,11 @@ def fetch_page(url:str):
     print('Fetch ' + url)
     try:
         response = requests.get(url,timeout=TIMEOUT_DURATION)
-    except requests.exceptions.RequestException:
+    except requests.exceptions.RequestException as e:
+        if isinstance(e, requests.exceptions.ConnectionError): # Max retries exceeded with url:
+            sleep(BACKOFF_DURATION)
+        else:
+            sleep(SLEEP_DURATION)
         response = fetch_page(url)
     return response
 
@@ -141,10 +145,17 @@ def post_get_author_rep_count(soup:BeautifulSoup):
 
 def get_all_reacts_on_page(soup:BeautifulSoup):
     reacts = soup.select('ol.block-body.js-reactionList-0 > li.block-row.block-row--separated > div.contentRow')
+    reactor_posts_count,reactor_rep_score,reactor_trophy_points_ct = react_get_reactor_stats(soup)
     return [{
         'REACT_DATE': react_get_timestamp(react),
         'REACT_TYPE': react_get_type(react),
-        'MEMBER_ID': react_get_reactor_id(react),
+        'member' : {
+            'MEMBER_ID': react_get_reactor_id(react),
+            'NAME': react_get_reactor_name(react),
+            'POSTS_COUNT': reactor_posts_count,
+            'REP_SCORE': reactor_rep_score,
+            'TROPHY_POINTS_COUNT': reactor_trophy_points_ct,
+        },
     } for react in reacts]
 
 def react_get_reactor_id(soup:BeautifulSoup):
@@ -156,10 +167,59 @@ def react_get_timestamp(soup:BeautifulSoup):
 def react_get_type(soup:BeautifulSoup):
     return soup.select('.contentRow-extra > span.reaction > img')[0]['alt']
 
+def react_get_reactor_name(soup:BeautifulSoup):
+    return soup.select('h3.contentRow-header > .username > span')[0].get_text()
+
+def react_get_reactor_stats(soup:BeautifulSoup):
+    def represents_int(s):
+        try:
+            int(s)
+        except ValueError:
+            return False
+        else:
+            return True
+
+    stats_list = soup.select('ul.listInline.listInline--bullet')[0]
+    dd_elems = stats_list.select('dd')
+    return [int(processed_text) if represents_int(processed_text := dd.get_text().strip().replace(',','')) else None for dd in dd_elems] # https://stackoverflow.com/a/55881984
+
 # reacts }
 
 with conn:
     def main():
+
+        def insert_or_update_member(db_cursor,MEMBER_ID=None,NAME=None,JOIN_DATE=None,POSTS_COUNT=None,REP_SCORE=None,TROPHY_POINTS_COUNT=None):
+            db_cursor.execute("SELECT Count() FROM Members WHERE MEMBER_ID=?",(MEMBER_ID,))
+            does_member_exist_in_DB = db_cursor.fetchone()[0] > 0
+
+            args = {
+                'MEMBER_ID':MEMBER_ID,
+                'NAME':NAME,
+                'JOIN_DATE':JOIN_DATE,
+                'POSTS_COUNT':POSTS_COUNT,
+                'REP_SCORE':REP_SCORE,
+                'TROPHY_POINTS_COUNT':TROPHY_POINTS_COUNT,
+            }
+
+            if not does_member_exist_in_DB:
+                db_cursor.execute(
+                    '''INSERT INTO Members (MEMBER_ID,NAME,JOIN_DATE,POSTS_COUNT,REP_SCORE,TROPHY_POINTS_COUNT) VALUES (?,?,?,?,?,?)''',
+                    tuple(args.values())
+                )
+                return
+
+            for arg_name,arg_val in args.items():
+
+                db_cursor.execute(
+                    f'''
+                        UPDATE Members SET {arg_name}=? WHERE MEMBER_ID=? AND {arg_name} IS NULL;
+                    ''',
+                    (arg_val,MEMBER_ID,)
+                )
+
+
+
+
 
         cur = conn.cursor()
 
@@ -225,14 +285,15 @@ with conn:
 
                         if not all([not member_prop_val is None for member_prop_val in post_data['member'].values()]):
                             continue # not all member data found such as with DM#6129=“Julius the Great”
-                        cur.execute('''SELECT Count() FROM Members WHERE MEMBER_ID=?''',
+                        '''
+                        cur.execute("SELECT Count() FROM Members WHERE MEMBER_ID=?",
                                     (post_data['member']['MEMBER_ID'],)
                         )
                         does_member_exist_in_DB = cur.fetchone()[0] > 0
+                        
                         if not does_member_exist_in_DB:
-                            conn.execute(
-                                '''INSERT INTO Members (MEMBER_ID,NAME,JOIN_DATE,POSTS_COUNT,REP_SCORE) VALUES (?,?,?,?,?)''',
-                                (post_data['member']['MEMBER_ID'], post_data['member']['NAME'], post_data['member']['JOIN_DATE'], post_data['member']['POSTS_COUNT'],post_data['member']['REP_SCORE']))
+                        '''
+                        insert_or_update_member(cur,**post_data['member'])
 
                         # { reacts
 
@@ -245,8 +306,16 @@ with conn:
                             for react_data in get_all_reacts_on_page(reacts_page_soup):
                                 conn.execute(
                                     '''INSERT INTO Reacts (POST_ID,MEMBER_ID,REACT_DATE,REACT_TYPE) VALUES (?,?,?,?)''',
-                                    (post_id, react_data['MEMBER_ID'], react_data['REACT_DATE'], react_data['REACT_TYPE'])
+                                    (post_id, react_data['member']['MEMBER_ID'], react_data['REACT_DATE'], react_data['REACT_TYPE'])
                                 )
+                                '''
+                                cur.execute("SELECT Count() FROM Members WHERE MEMBER_ID=?",
+                                            (post_data['member']['MEMBER_ID'],)
+                                            )
+                                does_member_exist_in_DB = cur.fetchone()[0] > 0
+                                if not does_member_exist_in_DB:
+                                '''
+                                insert_or_update_member(cur,**react_data['member'])
 
                         # reacts }
 
